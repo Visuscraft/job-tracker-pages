@@ -1,0 +1,1382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AHS Job Tracker — 20260813-213737-746058 UTC</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef4f8;
+      --card: #ffffff;
+      --ink: #102030;
+      --muted: #5f6f7d;
+      --border: #d7e1ea;
+      --accent: #006f9f;
+      --accent-dark: #00557a;
+      --chip: #e8f5fb;
+      --shadow: 0 16px 40px rgba(10, 35, 55, .12);
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(0, 111, 159, .22), transparent 18rem),
+        var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid rgba(0, 111, 159, .35);
+      outline-offset: 3px;
+    }
+    .page {
+      width: min(100%, 72rem);
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    .hero {
+      margin-top: .75rem;
+      padding: 1.4rem;
+      border-radius: 1.5rem;
+      background: linear-gradient(135deg, #063b5a, #0077a8);
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+    .hero__kicker {
+      margin: 0 0 .45rem;
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      opacity: .82;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 11vw, 4rem);
+      line-height: .95;
+      letter-spacing: -.06em;
+    }
+    .hero__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .55rem;
+      margin: 1rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .hero__meta li {
+      min-height: 2.2rem;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(255,255,255,.34);
+      border-radius: 999px;
+      padding: .38rem .72rem;
+      background: rgba(255,255,255,.13);
+      font-weight: 700;
+    }
+    .section-title {
+      margin: 1.4rem 0 .75rem;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .summary-grid {
+      display: grid;
+      gap: .85rem;
+    }
+    .summary-card,
+    .controls,
+    .job-card,
+    .empty-state {
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 10px 26px rgba(10, 35, 55, .07);
+    }
+    .summary-card {
+      padding: 1rem;
+    }
+    .summary-card h2 {
+      margin: 0 0 .7rem;
+      font-size: 1rem;
+    }
+    .summary-list {
+      display: grid;
+      gap: .55rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .summary-list li {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: .75rem;
+      align-items: center;
+      font-size: .95rem;
+    }
+    .summary-list span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .summary-list strong,
+    .result-count {
+      border-radius: 999px;
+      padding: .15rem .55rem;
+      background: var(--chip);
+      color: var(--accent-dark);
+      font-size: .82rem;
+      font-weight: 900;
+    }
+    .controls {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      margin: 1rem 0;
+      padding: .85rem;
+      backdrop-filter: blur(12px);
+    }
+    .search-row {
+      display: grid;
+      gap: .65rem;
+    }
+    label {
+      display: grid;
+      gap: .35rem;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    input,
+    select {
+      width: 100%;
+      min-height: 2.85rem;
+      border: 1px solid var(--border);
+      border-radius: .9rem;
+      padding: .7rem .85rem;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 1rem;
+    }
+    details.filter-panel {
+      margin-top: .7rem;
+    }
+    details.filter-panel summary {
+      min-height: 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      border-radius: .9rem;
+      padding: .62rem .8rem;
+      background: #f7fbfd;
+      color: var(--accent-dark);
+      cursor: pointer;
+      font-weight: 900;
+      list-style: none;
+    }
+    details.filter-panel summary::-webkit-details-marker { display: none; }
+    details.filter-panel summary::after { content: "▾"; }
+    details.filter-panel[open] summary::after { content: "▴"; }
+    .filter-grid {
+      display: grid;
+      gap: .75rem;
+      padding-top: .8rem;
+    }
+    .clear-button {
+      min-height: 2.85rem;
+      border: 1px solid var(--accent);
+      border-radius: .9rem;
+      padding: .7rem .95rem;
+      background: #fff;
+      color: var(--accent-dark);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 900;
+    }
+    .job-list {
+      display: grid;
+      gap: .85rem;
+      margin-bottom: 2rem;
+    }
+    .job-card {
+      display: grid;
+      gap: .9rem;
+      padding: 1rem;
+    }
+    .job-card[hidden] { display: none; }
+    .job-card__eyebrow {
+      margin: 0 0 .35rem;
+      color: var(--accent-dark);
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+    }
+    .job-card h2 {
+      margin: 0;
+      font-size: clamp(1.15rem, 5vw, 1.55rem);
+      line-height: 1.12;
+      letter-spacing: -.025em;
+      overflow-wrap: anywhere;
+    }
+    .job-card__meta {
+      display: grid;
+      gap: .45rem;
+      margin: .85rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .job-card__meta li {
+      display: grid;
+      grid-template-columns: minmax(6.5rem, 38%) minmax(0, 1fr);
+      gap: .65rem;
+      color: var(--ink);
+      font-size: .95rem;
+    }
+    .job-card__meta span,
+    .job-card__id {
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .job-card__id {
+      margin: .85rem 0 0;
+      font-size: .88rem;
+    }
+    .job-card__closes-value {
+      font-weight: 900;
+      color: var(--ink);
+    }
+    .job-card__closes-value.closes-red { color: #b3261e; }
+    .job-card__closes-value.closes-yellow { color: #8a6d00; }
+    .job-card__closes-value.closes-green { color: #1e7a34; }
+    .job-card__action {
+      min-height: 3rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: .95rem;
+      padding: .8rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 900;
+      text-decoration: none;
+    }
+    .job-card__action:hover { background: var(--accent-dark); }
+    .job-card__action--disabled {
+      background: #dbe4eb;
+      color: var(--muted);
+    }
+    .empty-state {
+      padding: 1.2rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .empty-state[hidden] { display: none; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (min-width: 42rem) {
+      .page { padding: 1.5rem; }
+      .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .search-row { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+      .filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; }
+      .job-card { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+      .job-card__action { min-width: 8rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="hero__kicker">Published digest</p>
+      <h1>AHS Job Tracker</h1>
+      <ul class="hero__meta" aria-label="Digest details">
+        <li>49 new jobs</li>
+        <li>Generated August 13, 2026 at 21:37 UTC</li>
+      </ul>
+    </header>
+
+    <section aria-labelledby="summary-title">
+      <h2 class="section-title" id="summary-title">Dashboard summary</h2>
+      <div class="summary-grid">
+        <article class="summary-card">
+          <h2>Top departments</h2>
+          <ol class="summary-list" id="department-summary"></ol>
+        </article>
+        <article class="summary-card">
+          <h2>Top roles</h2>
+          <ol class="summary-list" id="role-summary"></ol>
+        </article>
+        <article class="summary-card" id="location-summary-card">
+          <h2>Top locations</h2>
+          <ol class="summary-list" id="location-summary"></ol>
+        </article>
+        <article class="summary-card" id="type-summary-card">
+          <h2>Employment types</h2>
+          <ol class="summary-list" id="type-summary"></ol>
+        </article>
+        <article class="summary-card" id="expiry-summary-card">
+          <h2>Expiring soon</h2>
+          <ol class="summary-list" id="expiry-summary"></ol>
+        </article>
+      </div>
+    </section>
+
+    <section class="controls" aria-labelledby="controls-title">
+      <h2 class="sr-only" id="controls-title">Search, filter, and sort jobs</h2>
+      <div class="search-row">
+        <label for="job-search">
+          Search jobs
+          <input id="job-search" type="search" placeholder="Search title, department, status…" autocomplete="off">
+        </label>
+        <span class="result-count" id="result-count" aria-live="polite">49 results</span>
+      </div>
+      <details class="filter-panel">
+        <summary><span>Filters &amp; sort</span></summary>
+        <div class="filter-grid">
+          <label for="department-filter">
+            Department
+            <select id="department-filter">
+              <option value="">All departments</option>
+            </select>
+          </label>
+          <label for="role-filter">
+            Role
+            <select id="role-filter">
+              <option value="">All roles</option>
+            </select>
+          </label>
+          <label for="location-filter">
+            Location
+            <select id="location-filter">
+              <option value="">All locations</option>
+            </select>
+          </label>
+          <label for="type-filter" id="type-filter-group">
+            Job type
+            <select id="type-filter">
+              <option value="">All types</option>
+            </select>
+          </label>
+          <label for="sort-select">
+            Sort by
+            <select id="sort-select">
+              <option value="closing-asc">Closing date (soonest)</option>
+              <option value="closing-desc">Closing date (latest)</option>
+              <option value="title-asc">Title (A-Z)</option>
+              <option value="department-asc">Department (A-Z)</option>
+            </select>
+          </label>
+          <button class="clear-button" id="clear-filters" type="button">Clear filters</button>
+        </div>
+      </details>
+    </section>
+
+    <section aria-labelledby="results-title">
+      <h2 class="section-title" id="results-title">Results</h2>
+      <div class="job-list" id="job-list">
+
+    <article class="job-card"
+      data-job-card
+      data-department="FMC Emergency Department"
+      data-role="Registered Nurse - Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Emergency Department FMC Emergency Department NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587277">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">FMC Emergency Department</p>
+        <h2>Registered Nurse - Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>FMC Emergency Department</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587277</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-emergency-department-587277">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="FMC Emergency Department"
+      data-role="Registered Nurse - Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Emergency Department FMC Emergency Department NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587291">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">FMC Emergency Department</p>
+        <h2>Registered Nurse - Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>FMC Emergency Department</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587291</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-emergency-department-587291">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="FMC Emergency Department"
+      data-role="Registered Nurse - Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Emergency Department FMC Emergency Department NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587258">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">FMC Emergency Department</p>
+        <h2>Registered Nurse - Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>FMC Emergency Department</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587258</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-emergency-department-587258">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="ACCC PCU 95/125 Intensive Palliative Care &amp; Oncology"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Arthur Child Cancer Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse ACCC PCU 95/125 Intensive Palliative Care &amp; Oncology NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Arthur Child Cancer Centre 587382">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">ACCC PCU 95/125 Intensive Palliative Care &amp; Oncology</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>ACCC PCU 95/125 Intensive Palliative Care &amp; Oncology</li><li><span>Location</span>Arthur Child Cancer Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587382</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587382">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Urgent Care"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Sheldon M Chumir Health Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Urgent Care NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Sheldon M Chumir Health Centre 587309">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Urgent Care</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Urgent Care</li><li><span>Location</span>Sheldon M Chumir Health Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587309</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587309">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="FMC Emergency Department"
+      data-role="Registered Nurse - Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Emergency Department FMC Emergency Department NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587310">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">FMC Emergency Department</p>
+        <h2>Registered Nurse - Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>FMC Emergency Department</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587310</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-emergency-department-587310">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Urgent Care"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Sheldon M Chumir Health Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Urgent Care NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Sheldon M Chumir Health Centre 587315">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Urgent Care</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Urgent Care</li><li><span>Location</span>Sheldon M Chumir Health Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587315</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587315">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Cardiac Intensive Care Unit"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Cardiac Intensive Care Unit NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587329">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Cardiac Intensive Care Unit</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Cardiac Intensive Care Unit</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587329</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587329">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="PLC Emergency Department"
+      data-role="Registered Nurse-PLC Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Peter Lougheed Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse-PLC Emergency Department PLC Emergency Department NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Peter Lougheed Centre 587529">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">PLC Emergency Department</p>
+        <h2>Registered Nurse-PLC Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>PLC Emergency Department</li><li><span>Location</span>Peter Lougheed Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587529</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-plc-emergency-department-587529">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Emergency"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Registered Nurse Emergency NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Rockyview General Hospital 587614">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Emergency</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Emergency</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587614</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587614">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Emergency"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Registered Nurse Emergency NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Rockyview General Hospital 587495">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Emergency</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Emergency</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587495</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587495">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Emergency"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Registered Nurse Emergency NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Rockyview General Hospital 587499">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Emergency</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Emergency</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587499</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587499">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="RAAPID South"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="EMS Headquarters - Calgary"
+      data-closing-iso=""
+      data-search="Registered Nurse RAAPID South NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse EMS Headquarters - Calgary 587549">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">RAAPID South</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>RAAPID South</li><li><span>Location</span>EMS Headquarters - Calgary</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587549</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587549">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Labour and Delivery"
+      data-role="Registered Nurse - Labour and Delivery"
+      data-type="Registered Nurse"
+      data-location="Peter Lougheed Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Labour and Delivery Labour and Delivery NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Peter Lougheed Centre 587552">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Labour and Delivery</p>
+        <h2>Registered Nurse - Labour and Delivery</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Labour and Delivery</li><li><span>Location</span>Peter Lougheed Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587552</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-labour-and-delivery-587552">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Emergency Department"
+      data-role="Registered Nurse - Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Emergency Department Emergency Department NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587105">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Emergency Department</p>
+        <h2>Registered Nurse - Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Emergency Department</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587105</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-emergency-department-587105">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Units 105/119, Inpatient Hematology/Blood &amp; Marrow Transplant"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Arthur Child Cancer Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Units 105/119, Inpatient Hematology/Blood &amp; Marrow Transplant NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Arthur Child Cancer Centre 587083">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Units 105/119, Inpatient Hematology/Blood &amp; Marrow Transplant</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Units 105/119, Inpatient Hematology/Blood &amp; Marrow Transplant</li><li><span>Location</span>Arthur Child Cancer Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587083</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587083">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 68 Medical/Surgical"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="South Health Campus"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 68 Medical/Surgical NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse South Health Campus 587088">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 68 Medical/Surgical</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 68 Medical/Surgical</li><li><span>Location</span>South Health Campus</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587088</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587088">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 29 General Surgery"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Peter Lougheed Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 29 General Surgery NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Peter Lougheed Centre 587128">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 29 General Surgery</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 29 General Surgery</li><li><span>Location</span>Peter Lougheed Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587128</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587128">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Inpatient Heme/BMT"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Arthur Child Cancer Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Inpatient Heme/BMT NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Arthur Child Cancer Centre 587094">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Inpatient Heme/BMT</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Inpatient Heme/BMT</li><li><span>Location</span>Arthur Child Cancer Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587094</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587094">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="ACCC PCU 95/125 Intensive Palliative Care &amp; Oncology"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Arthur Child Cancer Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse ACCC PCU 95/125 Intensive Palliative Care &amp; Oncology NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Arthur Child Cancer Centre 587131">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">ACCC PCU 95/125 Intensive Palliative Care &amp; Oncology</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>ACCC PCU 95/125 Intensive Palliative Care &amp; Oncology</li><li><span>Location</span>Arthur Child Cancer Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587131</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587131">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="FMC Emergency Department"
+      data-role="Registered Nurse - Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Emergency Department FMC Emergency Department NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587136">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">FMC Emergency Department</p>
+        <h2>Registered Nurse - Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>FMC Emergency Department</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587136</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-emergency-department-587136">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 71 and 72"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 71 and 72 NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587144">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 71 and 72</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 71 and 72</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587144</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587144">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="FMC Emergency Department"
+      data-role="Registered Nurse - Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Emergency Department FMC Emergency Department NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587140">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">FMC Emergency Department</p>
+        <h2>Registered Nurse - Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>FMC Emergency Department</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587140</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-emergency-department-587140">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="IHC - Seniors North"
+      data-role="Registered Nurse - Designated Float"
+      data-type="Registered Nurse"
+      data-location="Northwest Centre 1"
+      data-closing-iso=""
+      data-search="Registered Nurse - Designated Float IHC - Seniors North NEW 14-AUG-2026 $44.56 - $60.98 Registered Nurse Northwest Centre 1 587159">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">IHC - Seniors North</p>
+        <h2>Registered Nurse - Designated Float</h2>
+        <ul class="job-card__meta"><li><span>Department</span>IHC - Seniors North</li><li><span>Location</span>Northwest Centre 1</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">14-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587159</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-designated-float-587159">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Operating Room and Minor Surgery Clinic"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Registered Nurse Operating Room and Minor Surgery Clinic NEW 17-AUG-2026 $43.26 - $59.21 Registered Nurse Rockyview General Hospital 587742">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Operating Room and Minor Surgery Clinic</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Operating Room and Minor Surgery Clinic</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$43.26 - $59.21</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587742</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587742">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Transition Services - RCTP Fanning"
+      data-role="Registered Nurse - Transition Services Coordinator"
+      data-type="Registered Nurse"
+      data-location="Southport"
+      data-closing-iso=""
+      data-search="Registered Nurse - Transition Services Coordinator Transition Services - RCTP Fanning NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse Southport 587711">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Transition Services - RCTP Fanning</p>
+        <h2>Registered Nurse - Transition Services Coordinator</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Transition Services - RCTP Fanning</li><li><span>Location</span>Southport</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587711</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-transition-services-coordinator-587711">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Intensive Care/Coronary Care Unit"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="South Health Campus"
+      data-closing-iso=""
+      data-search="Registered Nurse Intensive Care/Coronary Care Unit NEW 17-AUG-2026 $44.56 - $60.98 Registered Nurse South Health Campus 587795">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Intensive Care/Coronary Care Unit</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Intensive Care/Coronary Care Unit</li><li><span>Location</span>South Health Campus</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587795</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587795">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 71/72"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 71/72 NEW 20-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587941">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 71/72</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 71/72</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">20-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587941</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587941">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 95/125 - Palliative Care/Medical and Radiation Oncology"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Arthur Child Cancer Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 95/125 - Palliative Care/Medical and Radiation Oncology NEW 20-AUG-2026 $44.56 - $60.98 Registered Nurse Arthur Child Cancer Centre 587965">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 95/125 - Palliative Care/Medical and Radiation Oncology</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 95/125 - Palliative Care/Medical and Radiation Oncology</li><li><span>Location</span>Arthur Child Cancer Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">20-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587965</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587965">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Okotoks / Rural South Home Care"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Okotoks"
+      data-closing-iso=""
+      data-search="Registered Nurse Okotoks / Rural South Home Care NEW 20-AUG-2026 $44.56 - $60.98 Registered Nurse Okotoks 587974">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Okotoks / Rural South Home Care</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Okotoks / Rural South Home Care</li><li><span>Location</span>Okotoks</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">20-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587974</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587974">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 68 Medical/Surgical"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="South Health Campus"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 68 Medical/Surgical NEW 20-AUG-2026 $44.56 - $60.98 Registered Nurse South Health Campus 587917">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 68 Medical/Surgical</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 68 Medical/Surgical</li><li><span>Location</span>South Health Campus</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">20-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587917</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587917">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 62 - Labour and Delivery"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 62 - Labour and Delivery NEW 20-AUG-2026 $44.56 - $60.98 Registered Nurse Rockyview General Hospital 587936">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 62 - Labour and Delivery</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 62 - Labour and Delivery</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">20-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587936</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587936">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 71/72"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 71/72 NEW 20-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 587939">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 71/72</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 71/72</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">20-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 587939</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-587939">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Urgent Care Sheldon M Chumir"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Sheldon M Chumir Health Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Urgent Care Sheldon M Chumir NEW 21-AUG-2026 $44.56 - $60.98 Registered Nurse Sheldon M Chumir Health Centre 588169">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Urgent Care Sheldon M Chumir</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Urgent Care Sheldon M Chumir</li><li><span>Location</span>Sheldon M Chumir Health Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">21-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588169</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588169">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 63, Neonatal Intensive Care Unit"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 63, Neonatal Intensive Care Unit NEW 21-AUG-2026 $44.56 - $60.98 Registered Nurse Rockyview General Hospital 588135">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 63, Neonatal Intensive Care Unit</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 63, Neonatal Intensive Care Unit</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">21-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588135</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588135">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 63 NICU"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 63 NICU NEW 21-AUG-2026 $44.56 - $60.98 Registered Nurse Rockyview General Hospital 588261">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 63 NICU</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 63 NICU</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">21-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588261</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588261">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Surgical Suites and Minor Surgery Clinic"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="South Health Campus"
+      data-closing-iso=""
+      data-search="Registered Nurse Surgical Suites and Minor Surgery Clinic NEW 21-AUG-2026 $44.56 - $60.98 Registered Nurse South Health Campus 588139">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Surgical Suites and Minor Surgery Clinic</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Surgical Suites and Minor Surgery Clinic</li><li><span>Location</span>South Health Campus</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">21-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588139</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588139">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Unit 95/125 - Palliative Care/Medical and Radiation Oncology"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Arthur Child Cancer Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Unit 95/125 - Palliative Care/Medical and Radiation Oncology NEW 21-AUG-2026 $44.56 - $60.98 Registered Nurse Arthur Child Cancer Centre 588212">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Unit 95/125 - Palliative Care/Medical and Radiation Oncology</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Unit 95/125 - Palliative Care/Medical and Radiation Oncology</li><li><span>Location</span>Arthur Child Cancer Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">21-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588212</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588212">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Emergency Department"
+      data-role="Registered Nurse - Emergency Department"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse - Emergency Department Emergency Department NEW 24-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 588501">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Emergency Department</p>
+        <h2>Registered Nurse - Emergency Department</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Emergency Department</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">24-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588501</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-emergency-department-588501">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Diagnostic Imaging Interventional, Angio Study"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Foothills Medical Centre"
+      data-closing-iso=""
+      data-search="Registered Nurse Diagnostic Imaging Interventional, Angio Study NEW 24-AUG-2026 $44.56 - $60.98 Registered Nurse Foothills Medical Centre 588483">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Diagnostic Imaging Interventional, Angio Study</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Diagnostic Imaging Interventional, Angio Study</li><li><span>Location</span>Foothills Medical Centre</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">24-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588483</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588483">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="04 Home Care Rural East"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Strathmore"
+      data-closing-iso=""
+      data-search="Registered Nurse 04 Home Care Rural East NEW 24-AUG-2026 $44.56 - $60.98 Registered Nurse Strathmore 588395">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">04 Home Care Rural East</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>04 Home Care Rural East</li><li><span>Location</span>Strathmore</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">24-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588395</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588395">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="04 HC Rural East"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Chestermere"
+      data-closing-iso=""
+      data-search="Registered Nurse 04 HC Rural East NEW 24-AUG-2026 $44.56 - $60.98 Registered Nurse Chestermere 588382">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">04 HC Rural East</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>04 HC Rural East</li><li><span>Location</span>Chestermere</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">24-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588382</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588382">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Intensive Care/Coronary Care Unit"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="South Health Campus"
+      data-closing-iso=""
+      data-search="Registered Nurse Intensive Care/Coronary Care Unit NEW 24-AUG-2026 $44.56 - $60.98 Registered Nurse South Health Campus 588464">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Intensive Care/Coronary Care Unit</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Intensive Care/Coronary Care Unit</li><li><span>Location</span>South Health Campus</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">24-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588464</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588464">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Colon Cancer Screening Centre"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="FMC Treatment Res Wellness"
+      data-closing-iso=""
+      data-search="Registered Nurse Colon Cancer Screening Centre NEW 24-AUG-2026 $44.56 - $60.98 Registered Nurse FMC Treatment Res Wellness 588411">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Colon Cancer Screening Centre</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Colon Cancer Screening Centre</li><li><span>Location</span>FMC Treatment Res Wellness</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">24-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588411</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588411">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="ISFL South"
+      data-role="Registered Nurse - Float"
+      data-type="Registered Nurse"
+      data-location="Okotoks"
+      data-closing-iso=""
+      data-search="Registered Nurse - Float ISFL South NEW 24-AUG-2026 $44.56 - $60.98 Registered Nurse Okotoks 588405">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">ISFL South</p>
+        <h2>Registered Nurse - Float</h2>
+        <ul class="job-card__meta"><li><span>Department</span>ISFL South</li><li><span>Location</span>Okotoks</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">24-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588405</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-float-588405">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Emergency"
+      data-role="Registered Nurse"
+      data-type="Registered Nurse"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Registered Nurse Emergency NEW 24-AUG-2026 $44.56 - $60.98 Registered Nurse Rockyview General Hospital 588420">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Emergency</p>
+        <h2>Registered Nurse</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Emergency</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">24-AUG-2026</span></li><li><span>Salary</span>$44.56 - $60.98</li><li><span>Classification</span>Registered Nurse</li></ul>
+        <p class="job-card__id">Job ID: 588420</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/registered-nurse-588420">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Post-Anesthesia Care Unit"
+      data-role="Nurse Clinician"
+      data-type="Nurse Clinician"
+      data-location="South Health Campus"
+      data-closing-iso=""
+      data-search="Nurse Clinician Post-Anesthesia Care Unit NEW 17-AUG-2026 $46.05 - $63.02 Nurse Clinician South Health Campus 587750">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Post-Anesthesia Care Unit</p>
+        <h2>Nurse Clinician</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Post-Anesthesia Care Unit</li><li><span>Location</span>South Health Campus</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">17-AUG-2026</span></li><li><span>Salary</span>$46.05 - $63.02</li><li><span>Classification</span>Nurse Clinician</li></ul>
+        <p class="job-card__id">Job ID: 587750</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/nurse-clinician-587750">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Units 83, 84 and ET Therapy Clinic"
+      data-role="Patient Care Manager"
+      data-type="Manager"
+      data-location="Rockyview General Hospital"
+      data-closing-iso=""
+      data-search="Patient Care Manager Units 83, 84 and ET Therapy Clinic NEW 19-AUG-2026 $45.23 - $77.51 Manager Rockyview General Hospital 588445">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Units 83, 84 and ET Therapy Clinic</p>
+        <h2>Patient Care Manager</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Units 83, 84 and ET Therapy Clinic</li><li><span>Location</span>Rockyview General Hospital</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">19-AUG-2026</span></li><li><span>Salary</span>$45.23 - $77.51</li><li><span>Classification</span>Manager</li></ul>
+        <p class="job-card__id">Job ID: 588445</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/patient-care-manager-588445">View job</a>
+    </article>
+    <article class="job-card"
+      data-job-card
+      data-department="Provincial Student Placements, Health Professions Strategy and Practice, Health Shared Services"
+      data-role="Program Manager"
+      data-type="Program Manager"
+      data-location="Southport"
+      data-closing-iso=""
+      data-search="Program Manager Provincial Student Placements, Health Professions Strategy and Practice, Health Shared Services NEW 20-AUG-2026 $41.16 - $70.58 Program Manager Southport 587948">
+      <div class="job-card__content">
+        <p class="job-card__eyebrow">Provincial Student Placements, Health Professions Strategy and Practice, Health Shared Services</p>
+        <h2>Program Manager</h2>
+        <ul class="job-card__meta"><li><span>Department</span>Provincial Student Placements, Health Professions Strategy and Practice, Health Shared Services</li><li><span>Location</span>Southport</li><li><span>Status</span>NEW</li><li><span>Closes</span><span class="job-card__closes-value" data-closing-value data-closing-iso="">20-AUG-2026</span></li><li><span>Salary</span>$41.16 - $70.58</li><li><span>Classification</span>Program Manager</li></ul>
+        <p class="job-card__id">Job ID: 587948</p>
+      </div>
+      <a class="job-card__action" href="https://careers.albertahealthservices.ca/jobs/program-manager-587948">View job</a>
+    </article>
+      </div>
+      <p class="empty-state" id="empty-state" hidden>No jobs match the current filters.</p>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const cards = Array.from(document.querySelectorAll("[data-job-card]"));
+      const jobList = document.getElementById("job-list");
+      const search = document.getElementById("job-search");
+      const departmentFilter = document.getElementById("department-filter");
+      const roleFilter = document.getElementById("role-filter");
+      const locationFilter = document.getElementById("location-filter");
+      const typeFilter = document.getElementById("type-filter");
+      const typeGroup = document.getElementById("type-filter-group");
+      const typeSummaryCard = document.getElementById("type-summary-card");
+      const sortSelect = document.getElementById("sort-select");
+      const resultCount = document.getElementById("result-count");
+      const clearButton = document.getElementById("clear-filters");
+      const emptyState = document.getElementById("empty-state");
+
+      const clean = (value) => (value || "").trim();
+      const countBy = (list, key) => list.reduce((counts, card) => {
+        const value = clean(card.dataset[key]);
+        if (value && value.toLowerCase() !== "n/a") {
+          counts.set(value, (counts.get(value) || 0) + 1);
+        }
+        return counts;
+      }, new Map());
+      const sortedCounts = (list, key) => Array.from(countBy(list, key).entries())
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+      const renderSummary = (id, rows) => {
+        const list = document.getElementById(id);
+        list.innerHTML = "";
+        const visibleRows = rows.slice(0, 5);
+        if (!visibleRows.length) {
+          list.innerHTML = "<li><span>Not available</span><strong>0</strong></li>";
+          return;
+        }
+        visibleRows.forEach(([label, count]) => {
+          const item = document.createElement("li");
+          const name = document.createElement("span");
+          const total = document.createElement("strong");
+          name.textContent = label;
+          total.textContent = count;
+          item.append(name, total);
+          list.append(item);
+        });
+      };
+      const fillSelect = (select, rows) => {
+        rows.forEach(([label, count]) => {
+          const option = document.createElement("option");
+          option.value = label;
+          option.textContent = `${label} (${count})`;
+          select.append(option);
+        });
+      };
+
+      // Compute each card's days-to-close once, and colour-code its closing
+      // date: red when it closes in a day or less, yellow at two days, and
+      // green otherwise (including postings without a parseable date).
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      cards.forEach((card) => {
+        const closingIso = clean(card.dataset.closingIso);
+        let daysRemaining = null;
+        if (closingIso) {
+          const closingDate = new Date(`${closingIso}T00:00:00`);
+          if (!Number.isNaN(closingDate.getTime())) {
+            daysRemaining = Math.round((closingDate - today) / 86400000);
+          }
+        }
+        let bucket = "";
+        let colorClass = "closes-green";
+        if (daysRemaining !== null) {
+          if (daysRemaining <= 1) {
+            bucket = "1";
+            colorClass = "closes-red";
+          } else if (daysRemaining === 2) {
+            bucket = "2";
+            colorClass = "closes-yellow";
+          } else if (daysRemaining === 3) {
+            bucket = "3";
+          } else {
+            bucket = "4+";
+          }
+        }
+        card.dataset.expiryBucket = bucket;
+        const closesValue = card.querySelector(".job-card__closes-value");
+        if (closesValue) {
+          closesValue.classList.add(colorClass);
+        }
+      });
+
+      const departments = sortedCounts(cards, "department");
+      const roles = sortedCounts(cards, "role");
+      const locations = sortedCounts(cards, "location");
+      const types = sortedCounts(cards, "type");
+      const hasReliableTypes = cards.length > 0 && cards.every((card) => clean(card.dataset.type));
+      fillSelect(departmentFilter, departments);
+      fillSelect(roleFilter, roles);
+      fillSelect(locationFilter, locations);
+      fillSelect(typeFilter, types);
+      if (!locations.length) {
+        document.getElementById("location-summary-card").hidden = true;
+        locationFilter.closest("label").hidden = true;
+      }
+      if (!hasReliableTypes || !types.length) {
+        typeGroup.hidden = true;
+        typeSummaryCard.hidden = true;
+      }
+
+      const EXPIRY_LABELS = [
+        ["1", "Expiring in 1 day (or already closed)"],
+        ["2", "Expiring in 2 days"],
+        ["3", "Expiring in 3 days"],
+        ["4+", "Expiring in 4+ days"],
+      ];
+      const renderExpirySummary = (list) => {
+        const counts = countBy(list, "expiryBucket");
+        const container = document.getElementById("expiry-summary");
+        container.innerHTML = "";
+        EXPIRY_LABELS.forEach(([bucket, label]) => {
+          const item = document.createElement("li");
+          const name = document.createElement("span");
+          const total = document.createElement("strong");
+          name.textContent = label;
+          total.textContent = counts.get(bucket) || 0;
+          item.append(name, total);
+          container.append(item);
+        });
+      };
+
+      const compareClosing = (a, b, direction) => {
+        const aIso = clean(a.dataset.closingIso);
+        const bIso = clean(b.dataset.closingIso);
+        if (!aIso && !bIso) return 0;
+        if (!aIso) return 1;
+        if (!bIso) return -1;
+        return direction * aIso.localeCompare(bIso);
+      };
+      const SORTERS = {
+        "closing-asc": (a, b) => compareClosing(a, b, 1),
+        "closing-desc": (a, b) => compareClosing(a, b, -1),
+        "title-asc": (a, b) => clean(a.dataset.role).localeCompare(clean(b.dataset.role)),
+        "department-asc": (a, b) => clean(a.dataset.department).localeCompare(clean(b.dataset.department)),
+      };
+
+      const applyFilters = () => {
+        const keyword = clean(search.value).toLowerCase();
+        const department = departmentFilter.value;
+        const role = roleFilter.value;
+        const location = locationFilter.value;
+        const type = typeFilter.value;
+        const visibleCards = [];
+        cards.forEach((card) => {
+          const matchesKeyword = !keyword || clean(card.dataset.search).toLowerCase().includes(keyword);
+          const matchesDepartment = !department || card.dataset.department === department;
+          const matchesRole = !role || card.dataset.role === role;
+          const matchesLocation = !location || card.dataset.location === location;
+          const matchesType = !type || card.dataset.type === type;
+          const matches = matchesKeyword && matchesDepartment && matchesRole
+            && matchesLocation && matchesType;
+          card.hidden = !matches;
+          if (matches) visibleCards.push(card);
+        });
+
+        const sorter = SORTERS[sortSelect.value] || SORTERS["closing-asc"];
+        cards.slice().sort(sorter).forEach((card) => jobList.append(card));
+
+        resultCount.textContent = `${visibleCards.length} ${visibleCards.length === 1 ? "result" : "results"}`;
+        emptyState.hidden = visibleCards.length !== 0;
+
+        renderSummary("department-summary", sortedCounts(visibleCards, "department"));
+        renderSummary("role-summary", sortedCounts(visibleCards, "role"));
+        renderSummary("location-summary", sortedCounts(visibleCards, "location"));
+        renderSummary("type-summary", sortedCounts(visibleCards, "type"));
+        renderExpirySummary(visibleCards);
+      };
+
+      [search, departmentFilter, roleFilter, locationFilter, typeFilter, sortSelect].forEach((control) => {
+        control.addEventListener("input", applyFilters);
+        control.addEventListener("change", applyFilters);
+      });
+      clearButton.addEventListener("click", () => {
+        search.value = "";
+        departmentFilter.value = "";
+        roleFilter.value = "";
+        locationFilter.value = "";
+        typeFilter.value = "";
+        sortSelect.value = "closing-asc";
+        applyFilters();
+        search.focus();
+      });
+      applyFilters();
+    })();
+  </script>
+</body>
+</html>
